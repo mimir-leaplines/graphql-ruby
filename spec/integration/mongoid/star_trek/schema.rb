@@ -200,22 +200,7 @@ module StarTrek
       elsif ship_name == 'Scimitar'
         LazyWrapper.new { raise GraphQL::ExecutionError.new("💥")}
       else
-        ship = DATA.create_ship(ship_name, faction_id)
-        faction = DATA["Faction"][faction_id]
-        connection_class = GraphQL::Relay::BaseConnection.connection_for_nodes(faction.ships)
-        ships_connection = connection_class.new(faction.ships, args)
-        ship_edge = GraphQL::Relay::Edge.new(ship, ships_connection)
-        result = {
-          shipEdge: ship_edge,
-          ship_edge: ship_edge, # support new-style, too
-          faction: faction,
-          aliased_faction: faction,
-        }
-        if ship_name == "Slave II"
-          LazyWrapper.new(result)
-        else
-          result
-        end
+        raise "Invariant -- not implemented"
       end
     end
   end
@@ -311,9 +296,7 @@ module StarTrek
           "baseId" => { "$max" => "$_id" }
         }
       }])
-      Base.
-        in(id: agg.map { |doc| doc['baseId'] }).
-        order_by(faction_id: -1)
+      Base.in(id: agg.map { |doc| doc['baseId'] }).order_by(faction_id: -1)
     end
 
     field :bases_with_null_name, BaseType.connection_type, null: false

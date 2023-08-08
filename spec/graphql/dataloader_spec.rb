@@ -1213,12 +1213,12 @@ describe GraphQL::Dataloader do
       query QueryType
       use GraphQL::Dataloader
     end
-  end
 
-  it "loads data from inside source methods" do
-    assert_equal({ "data" => { "nested" => "nested" } }, NestedDataloaderCallsSchema.execute("{ nested }"))
-    assert_equal({ "data" => { "nested2" => "nested2" } }, NestedDataloaderCallsSchema.execute("{ nested2 }"))
-    assert_equal({ "data" => { "nested" => "nested", "nested2" => "nested2" } }, NestedDataloaderCallsSchema.execute("{ nested nested2 }"))
+    it "loads data from inside source methods" do
+      assert_equal({ "data" => { "nested" => "nested" } }, NestedDataloaderCallsSchema.execute("{ nested }"))
+      assert_equal({ "data" => { "nested2" => "nested2" } }, NestedDataloaderCallsSchema.execute("{ nested2 }"))
+      assert_equal({ "data" => { "nested" => "nested", "nested2" => "nested2" } }, NestedDataloaderCallsSchema.execute("{ nested nested2 }"))
+    end
   end
 
   describe "with lazy authorization hooks" do

@@ -9,6 +9,8 @@ gem 'pry'
 gem 'pry-stack_explorer', platform: :ruby
 gem 'graphql-batch'
 gem 'pry-byebug'
+gem 'mongoid'
+gem 'rails'
 
 # For Ruby 3.2 compat:
 gem "yard", github: "lsegal/yard", ref: "b51bf26"

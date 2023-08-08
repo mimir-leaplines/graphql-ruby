@@ -1,4 +1,4 @@
 --dir
 .
---ignore=tmp/
+--ignore=tmp/,spec/fixtures/cop,spec/dummy/app
 --ignore=vendor/
