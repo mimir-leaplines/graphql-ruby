@@ -23,3 +23,7 @@ group :jekyll_plugins do
   gem 'jekyll-algolia', '~> 1.0'
   gem 'jekyll-redirect-from'
 end
+
+gem 'sorbet', :group => :development
+gem 'sorbet-runtime'
+gem 'tapioca', require: false, :group => :development
