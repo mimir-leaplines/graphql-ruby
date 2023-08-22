@@ -6,8 +6,10 @@
 
 class ::ActionCable::Channel::Base; end
 class ::ActionController::Base; end
+class ::ActionController::Parameters; end
 class ::ActionDispatch::SystemTestCase; end
 class ::ActiveJob::Base; end
+class ::ActionPack::VERSION::MAJOR; end;
 class ::ActiveRecord::Base; end
 class ::ActiveRecord::Schema; end
 module ::ActiveSupport; end
@@ -54,6 +56,7 @@ module Rails::VERSION::STRING; end
 module ActiveModel; end
 module Rails; end
 class Rails::Generators::Base; end
+class Rails::Generators::ActiveModel; end
 module Rails::Generators::ResourceHelpers; end
 class Rails::Generators::NamedBase; end
 module GlobalID::Identification; end
