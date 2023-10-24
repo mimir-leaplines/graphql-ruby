@@ -52,6 +52,13 @@ module GraphQL
           # { Class => Boolean }
           @lazy_cache = {}
           @lazy_cache.compare_by_identity
+
+          @gathered_selections_cache = Hash.new { |h, k|
+            cache = {}
+            cache.compare_by_identity
+            h[k] = cache
+          }
+          @gathered_selections_cache.compare_by_identity
         end
 
         def final_result
@@ -137,10 +144,16 @@ module GraphQL
         end
 
         def gather_selections(owner_object, owner_type, selections, selections_to_run = nil, selections_by_name = {})
+          if (cached = @gathered_selections_cache[owner_type][selections])
+            return cached
+          end
+
+          should_cache = true
 
           selections.each do |node|
             # Skip gathering this if the directive says so
             if !directives_include?(node, owner_object, owner_type)
+              should_cache = false
               next
             end
 
@@ -163,6 +176,7 @@ module GraphQL
             else
               # This is an InlineFragment or a FragmentSpread
               if @runtime_directive_names.any? && node.directives.any? { |d| @runtime_directive_names.include?(d.name) }
+                should_cache = false
                 next_selections = {}
                 next_selections[:graphql_directives] = node.directives
                 if selections_to_run
@@ -199,7 +213,11 @@ module GraphQL
               end
             end
           end
-          selections_to_run || selections_by_name
+          gathered = selections_to_run || selections_by_name
+          if should_cache
+            @gathered_selections_cache[owner_type][selections] = gathered
+          end
+          gathered
         end
 
         NO_ARGS = GraphQL::EmptyObjects::EMPTY_HASH
