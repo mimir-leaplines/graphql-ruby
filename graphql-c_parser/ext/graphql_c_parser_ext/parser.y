@@ -124,43 +124,47 @@ SETUP_NODE_CLASS_VARIABLE(SchemaExtension)
       executable_definition
     | type_system_definition
     | type_system_extension
+    | comment
 
   executable_definition:
       operation_definition
     | fragment_definition
 
   operation_definition:
-      operation_type operation_name_opt variable_definitions_opt directives_list_opt selection_set {
-        $$ = MAKE_AST_NODE(OperationDefinition, 7,
-          rb_ary_entry($1, 1),
-          rb_ary_entry($1, 2),
-          rb_ary_entry($1, 3),
-          (RB_TEST($2) ? rb_ary_entry($2, 3) : Qnil),
-          $3,
+      comment_opt operation_type operation_name_opt variable_definitions_opt directives_list_opt selection_set {
+        $$ = MAKE_AST_NODE(OperationDefinition, 8,
+          rb_ary_entry($2, 1),
+          rb_ary_entry($2, 2),
+          rb_ary_entry($2, 3),
+          (RB_TEST($3) ? rb_ary_entry($3, 3) : Qnil),
           $4,
-          $5
+          $5,
+          $6,
+          (RB_TEST($1) ? rb_ary_entry($1, 3) : Qnil)
         );
       }
-    | LCURLY selection_list RCURLY {
-        $$ = MAKE_AST_NODE(OperationDefinition, 7,
-          rb_ary_entry($1, 1),
-          rb_ary_entry($1, 2),
+    | comment_opt LCURLY selection_list RCURLY {
+        $$ = MAKE_AST_NODE(OperationDefinition, 8,
+          rb_ary_entry($2, 1),
+          rb_ary_entry($2, 2),
           r_string_query,
           Qnil,
           GraphQL_Language_Nodes_NONE,
           GraphQL_Language_Nodes_NONE,
-          $2
+          $3,
+          (RB_TEST($1) ? rb_ary_entry($1, 3) : Qnil) // comment
         );
       }
-    | LCURLY RCURLY {
-        $$ = MAKE_AST_NODE(OperationDefinition, 7,
-          rb_ary_entry($1, 1),
-          rb_ary_entry($1, 2),
+    | comment_opt LCURLY RCURLY {
+        $$ = MAKE_AST_NODE(OperationDefinition, 8,
+          rb_ary_entry($2, 1),
+          rb_ary_entry($2, 2),
           r_string_query,
           Qnil,
           GraphQL_Language_Nodes_NONE,
           GraphQL_Language_Nodes_NONE,
-          GraphQL_Language_Nodes_NONE
+          GraphQL_Language_Nodes_NONE,
+          (RB_TEST($1) ? rb_ary_entry($1, 3) : Qnil) // comment
         );
       }
 
@@ -214,26 +218,29 @@ SETUP_NODE_CLASS_VARIABLE(SchemaExtension)
     | selection_set
 
   field:
-    name COLON name arguments_opt directives_list_opt selection_set_opt {
-      $$ = MAKE_AST_NODE(Field, 7,
-        rb_ary_entry($1, 1),
-        rb_ary_entry($1, 2),
-        rb_ary_entry($1, 3), // alias
-        rb_ary_entry($3, 3), // name
-        $4, // args
-        $5, // directives
-        $6 // subselections
+    comment_opt name COLON name arguments_opt directives_list_opt selection_set_opt {
+      rb_p($1);
+      $$ = MAKE_AST_NODE(Field, 8,
+        rb_ary_entry($2, 1),
+        rb_ary_entry($2, 2),
+        rb_ary_entry($2, 3), // alias
+        rb_ary_entry($4, 3), // name
+        $5, // args
+        $6, // directives
+        $7, // subselections
+        (RB_TEST($1) ? rb_ary_entry($1, 3) : Qnil) // comment
       );
     }
-    | name arguments_opt directives_list_opt selection_set_opt {
-      $$ = MAKE_AST_NODE(Field, 7,
-        rb_ary_entry($1, 1),
-        rb_ary_entry($1, 2),
+    | comment_opt name arguments_opt directives_list_opt selection_set_opt {
+      $$ = MAKE_AST_NODE(Field, 8,
+        rb_ary_entry($2, 1),
+        rb_ary_entry($2, 2),
         Qnil, // alias
-        rb_ary_entry($1, 3), // name
-        $2, // args
-        $3, // directives
-        $4 // subselections
+        rb_ary_entry($2, 3), // name
+        $3, // args
+        $4, // directives
+        $5, // subselections
+        (RB_TEST($1) ? rb_ary_entry($1, 3) : Qnil) // comment
       );
     }
 
@@ -410,12 +417,13 @@ SETUP_NODE_CLASS_VARIABLE(SchemaExtension)
 
 
   fragment_spread:
-      ELLIPSIS name_without_on directives_list_opt {
-        $$ = MAKE_AST_NODE(FragmentSpread, 4,
-          rb_ary_entry($1, 1),
-          rb_ary_entry($1, 2),
-          rb_ary_entry($2, 3),
-          $3
+      comment_opt ELLIPSIS name_without_on directives_list_opt {
+        $$ = MAKE_AST_NODE(FragmentSpread, 5,
+          rb_ary_entry($2, 1),
+          rb_ary_entry($2, 2),
+          rb_ary_entry($3, 3),
+          $3,
+          (RB_TEST($1) ? rb_ary_entry($1, 3) : Qnil) // comment
         );
       }
 
@@ -440,14 +448,15 @@ SETUP_NODE_CLASS_VARIABLE(SchemaExtension)
       }
 
   fragment_definition:
-    FRAGMENT fragment_name_opt ON type directives_list_opt selection_set {
-      $$ = MAKE_AST_NODE(FragmentDefinition, 6,
-        rb_ary_entry($1, 1),
-        rb_ary_entry($1, 2),
-        $2,
-        $4,
+    comment_opt FRAGMENT fragment_name_opt ON type directives_list_opt selection_set {
+      $$ = MAKE_AST_NODE(FragmentDefinition, 7,
+        rb_ary_entry($2, 1),
+        rb_ary_entry($2, 2),
+        $3,
         $5,
-        $6
+        $6,
+        $7,
+        (RB_TEST($1) ? rb_ary_entry($1, 3) : Qnil) // comment
       );
     }
 
@@ -532,28 +541,28 @@ type_system_definition:
     | comment
 
   scalar_type_definition:
-      description_opt SCALAR name directives_list_opt {
-        $$ = MAKE_AST_NODE(ScalarTypeDefinition, 5,
-          rb_ary_entry($2, 1),
-          rb_ary_entry($2, 2),
-          rb_ary_entry($3, 3),
-          // TODO see get_description for reading a description from comments
-          (RB_TEST($1) ? rb_ary_entry($1, 3) : Qnil),
-          $4
+      comment_opt description_opt SCALAR name directives_list_opt {
+        $$ = MAKE_AST_NODE(ScalarTypeDefinition, 6,
+          rb_ary_entry($3, 1),
+          rb_ary_entry($3, 2),
+          rb_ary_entry($4, 3),
+          (RB_TEST($2) ? rb_ary_entry($2, 3) : Qnil),
+          $5,
+          (RB_TEST($1) ? rb_ary_entry($1, 3) : Qnil) // comment
         );
       }
 
   object_type_definition:
-      description_opt TYPE_LITERAL name implements_opt directives_list_opt field_definition_list_opt {
-        $$ = MAKE_AST_NODE(ObjectTypeDefinition, 7,
-          rb_ary_entry($2, 1),
-          rb_ary_entry($2, 2),
-          rb_ary_entry($3, 3),
-          $4, // implements
-          // TODO see get_description for reading a description from comments
-          (RB_TEST($1) ? rb_ary_entry($1, 3) : Qnil),
-          $5,
-          $6
+      comment_opt description_opt TYPE_LITERAL name implements_opt directives_list_opt field_definition_list_opt {
+        $$ = MAKE_AST_NODE(ObjectTypeDefinition, 8,
+          rb_ary_entry($3, 1),
+          rb_ary_entry($3, 2),
+          rb_ary_entry($4, 3),
+          $5, // implements
+          (RB_TEST($2) ? rb_ary_entry($2, 3) : Qnil),
+          $6,
+          $7,
+          (RB_TEST($1) ? rb_ary_entry($1, 3) : Qnil) // comment
         );
       }
 
@@ -591,16 +600,16 @@ type_system_definition:
     }
 
   input_value_definition:
-      description_opt name COLON type default_value_opt directives_list_opt {
-        $$ = MAKE_AST_NODE(InputValueDefinition, 7,
-          rb_ary_entry($2, 1),
-          rb_ary_entry($2, 2),
-          rb_ary_entry($2, 3),
-          $4,
+      comment_opt description_opt name COLON type default_value_opt directives_list_opt {
+        $$ = MAKE_AST_NODE(InputValueDefinition, 8,
+          rb_ary_entry($3, 1),
+          rb_ary_entry($3, 2),
+          rb_ary_entry($3, 3),
           $5,
-          // TODO see get_description for reading a description from comments
-          (RB_TEST($1) ? rb_ary_entry($1, 3) : Qnil),
-          $6
+          $6,
+          (RB_TEST($2) ? rb_ary_entry($2, 3) : Qnil),
+          $7,
+          (RB_TEST($1) ? rb_ary_entry($1, 3) : Qnil) // comment
         );
       }
 
@@ -613,16 +622,16 @@ type_system_definition:
     | LPAREN input_value_definition_list RPAREN { $$ = $2; }
 
   field_definition:
-      description_opt name arguments_definitions_opt COLON type directives_list_opt {
-        $$ = MAKE_AST_NODE(FieldDefinition, 7,
-          rb_ary_entry($2, 1),
-          rb_ary_entry($2, 2),
-          rb_ary_entry($2, 3),
-          $5,
-          // TODO see get_description for reading a description from comments
-          (RB_TEST($1) ? rb_ary_entry($1, 3) : Qnil),
-          $3,
-          $6
+      comment_opt description_opt name arguments_definitions_opt COLON type directives_list_opt {
+        $$ = MAKE_AST_NODE(FieldDefinition, 8,
+          rb_ary_entry($3, 1),
+          rb_ary_entry($3, 2),
+          rb_ary_entry($3, 3),
+          $6,
+          (RB_TEST($2) ? rb_ary_entry($2, 3) : Qnil),
+          $4,
+          $7,
+          (RB_TEST($1) ? rb_ary_entry($1, 3) : Qnil) // comment
         );
       }
 
@@ -636,16 +645,16 @@ type_system_definition:
     | field_definition_list field_definition { rb_ary_push($$, $2); }
 
   interface_type_definition:
-      description_opt INTERFACE name implements_opt directives_list_opt field_definition_list_opt {
-        $$ = MAKE_AST_NODE(InterfaceTypeDefinition, 7,
-          rb_ary_entry($2, 1),
-          rb_ary_entry($2, 2),
-          rb_ary_entry($3, 3),
-          // TODO see get_description for reading a description from comments
-          (RB_TEST($1) ? rb_ary_entry($1, 3) : Qnil),
-          $4,
+      comment_opt description_opt INTERFACE name implements_opt directives_list_opt field_definition_list_opt {
+        $$ = MAKE_AST_NODE(InterfaceTypeDefinition, 8,
+          rb_ary_entry($3, 1),
+          rb_ary_entry($3, 2),
+          rb_ary_entry($4, 3),
+          (RB_TEST($2) ? rb_ary_entry($2, 3) : Qnil),
           $5,
-          $6
+          $6,
+          $7,
+          (RB_TEST($1) ? rb_ary_entry($1, 3) : Qnil) // comment
         );
       }
 
@@ -667,40 +676,40 @@ type_system_definition:
       }
 
   union_type_definition:
-      description_opt UNION name directives_list_opt EQUALS union_members {
-        $$ = MAKE_AST_NODE(UnionTypeDefinition,  6,
-          rb_ary_entry($2, 1),
-          rb_ary_entry($2, 2),
-          rb_ary_entry($3, 3),
-          $6, // types
-          // TODO see get_description for reading a description from comments
-          (RB_TEST($1) ? rb_ary_entry($1, 3) : Qnil),
-          $4
+      comment_opt description_opt UNION name directives_list_opt EQUALS union_members {
+        $$ = MAKE_AST_NODE(UnionTypeDefinition, 7,
+          rb_ary_entry($3, 1),
+          rb_ary_entry($3, 2),
+          rb_ary_entry($4, 3),
+          $7, // types
+          (RB_TEST($2) ? rb_ary_entry($2, 3) : Qnil),
+          $5,
+          (RB_TEST($1) ? rb_ary_entry($1, 3) : Qnil) // comment
         );
       }
 
   enum_type_definition:
-      description_opt ENUM name directives_list_opt LCURLY enum_value_definitions RCURLY {
-        $$ = MAKE_AST_NODE(EnumTypeDefinition,  6,
-          rb_ary_entry($2, 1),
-          rb_ary_entry($2, 2),
-          rb_ary_entry($3, 3),
-          // TODO see get_description for reading a description from comments
-          (RB_TEST($1) ? rb_ary_entry($1, 3) : Qnil),
-          $4,
-          $6
+      comment_opt description_opt ENUM name directives_list_opt LCURLY enum_value_definitions RCURLY {
+        $$ = MAKE_AST_NODE(EnumTypeDefinition, 7,
+          rb_ary_entry($3, 1),
+          rb_ary_entry($3, 2),
+          rb_ary_entry($4, 3),
+          (RB_TEST($2) ? rb_ary_entry($2, 3) : Qnil),
+          $5,
+          $7,
+          (RB_TEST($1) ? rb_ary_entry($1, 3) : Qnil) // comment
         );
       }
 
   enum_value_definition:
-    description_opt enum_name directives_list_opt {
-      $$ = MAKE_AST_NODE(EnumValueDefinition, 5,
-        rb_ary_entry($2, 1),
-        rb_ary_entry($2, 2),
-        rb_ary_entry($2, 3),
-        // TODO see get_description for reading a description from comments
-        (RB_TEST($1) ? rb_ary_entry($1, 3) : Qnil),
-        $3
+    comment_opt description_opt enum_name directives_list_opt {
+      $$ = MAKE_AST_NODE(EnumValueDefinition, 6,
+        rb_ary_entry($3, 1),
+        rb_ary_entry($3, 2),
+        rb_ary_entry($4, 3),
+        (RB_TEST($2) ? rb_ary_entry($2, 3) : Qnil),
+        $4,
+        (RB_TEST($1) ? rb_ary_entry($1, 3) : Qnil) // comment
       );
     }
 
@@ -709,29 +718,29 @@ type_system_definition:
     | enum_value_definitions enum_value_definition { rb_ary_push($$, $2); }
 
   input_object_type_definition:
-      description_opt INPUT name directives_list_opt LCURLY input_value_definition_list RCURLY {
-        $$ = MAKE_AST_NODE(InputObjectTypeDefinition, 6,
-          rb_ary_entry($2, 1),
-          rb_ary_entry($2, 2),
-          rb_ary_entry($3, 3),
-          // TODO see get_description for reading a description from comments
-          (RB_TEST($1) ? rb_ary_entry($1, 3) : Qnil),
-          $4,
-          $6
+      comment_opt description_opt INPUT name directives_list_opt LCURLY input_value_definition_list RCURLY {
+        $$ = MAKE_AST_NODE(InputObjectTypeDefinition, 7,
+          rb_ary_entry($3, 1),
+          rb_ary_entry($3, 2),
+          rb_ary_entry($4, 3),
+          (RB_TEST($2) ? rb_ary_entry($2, 3) : Qnil),
+          $5,
+          $7,
+          (RB_TEST($1) ? rb_ary_entry($1, 3) : Qnil) // comment
         );
       }
 
   directive_definition:
-      description_opt DIRECTIVE DIR_SIGN name arguments_definitions_opt directive_repeatable_opt ON directive_locations {
-        $$ = MAKE_AST_NODE(DirectiveDefinition, 7,
-          rb_ary_entry($2, 1),
-          rb_ary_entry($2, 2),
-          rb_ary_entry($4, 3),
-          (RB_TEST($6) ? Qtrue : Qfalse), // repeatable
-          // TODO see get_description for reading a description from comments
-          (RB_TEST($1) ? rb_ary_entry($1, 3) : Qnil),
+      comment_opt description_opt DIRECTIVE DIR_SIGN name arguments_definitions_opt directive_repeatable_opt ON directive_locations {
+        $$ = MAKE_AST_NODE(DirectiveDefinition, 8,
+          rb_ary_entry($3, 1),
+          rb_ary_entry($3, 2),
+          rb_ary_entry($5, 3),
+          (RB_TEST($7) ? Qtrue : Qfalse), // repeatable
+          (RB_TEST($2) ? rb_ary_entry($2, 3) : Qnil),
           $5,
-          $8
+          $8,
+          (RB_TEST($1) ? rb_ary_entry($1, 3) : Qnil) // comment
         );
       }
 
