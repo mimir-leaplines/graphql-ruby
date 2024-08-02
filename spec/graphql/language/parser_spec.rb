@@ -287,7 +287,8 @@ it "creates an anonymous fragment definition" do
     it "is parsed for anonymous query" do
       query_str = <<-GRAPHQL
         # Anonymous query comment
-        query ($sizes: [ImageSize]) # Anonymous inline comment
+        query # Comment between parts of a query
+          ($sizes: [ImageSize]) # Anonymous inline comment
         {
           # Field comment
           imageUrl(sizes: $sizes) # Field inline comment
